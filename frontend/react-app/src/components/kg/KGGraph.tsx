@@ -190,6 +190,7 @@ export default function KGGraph() {
 
   // Track current node positions in ref to avoid re-running force simulation loop
   const nodesRef = useRef<Node[]>([])
+  const simulationRef = useRef<any>(null)
   useEffect(() => {
     nodesRef.current = nodes
   }, [nodes])
@@ -224,6 +225,23 @@ export default function KGGraph() {
       )
     })
   }, [data?.edges, nodeById, selectedTypes])
+
+  const [hoveredNodeId, setHoveredNodeId] = useState<string | null>(null)
+
+  const connectedNodeIds = useMemo(() => {
+    const set = new Set<string>()
+    if (hoveredNodeId) {
+      set.add(hoveredNodeId)
+      filteredEdges.forEach((edge) => {
+        if (edge.source === hoveredNodeId) {
+          set.add(edge.target)
+        } else if (edge.target === hoveredNodeId) {
+          set.add(edge.source)
+        }
+      })
+    }
+    return set
+  }, [hoveredNodeId, filteredEdges])
 
   useEffect(() => {
     if (!isError) return
@@ -288,6 +306,8 @@ export default function KGGraph() {
       .force('center', forceCenter(0, 0))
       .alphaMin(0.01)
 
+    simulationRef.current = simulation
+
     simulation.on('tick', () => {
       // Update nodes
       const updatedFlowNodes: Node[] = simNodes.map((n) => {
@@ -299,7 +319,9 @@ export default function KGGraph() {
             label: n.label,
             type: n.type,
             degree: n.degree,
-            isDimmed: focusNodeIds.size > 0 && !focusNodeIds.has(n.id),
+            isDimmed:
+              (focusNodeIds.size > 0 && !focusNodeIds.has(n.id)) ||
+              (hoveredNodeId !== null && !connectedNodeIds.has(n.id)),
           },
         }
       })
@@ -308,7 +330,11 @@ export default function KGGraph() {
       const updatedFlowEdges: Edge[] = filteredEdges.map((edge, index) => {
         const id = edgeId(edge, index)
         const isFocused = Boolean(graphFocus?.edgeId && id === graphFocus?.edgeId)
+        const isDimmedEdge = hoveredNodeId !== null && edge.source !== hoveredNodeId && edge.target !== hoveredNodeId
         const width = clamp(1 + Math.log2(Math.max(1, edge.weight ?? 1)), 1.4, 5)
+
+        const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark')
+        const dimmedStroke = isDark ? '#1e293b' : '#e2e8f0'
 
         return {
           id,
@@ -317,12 +343,18 @@ export default function KGGraph() {
           label: edge.relation?.slice(0, 28),
           animated: isFocused,
           style: {
-            stroke: isFocused ? '#10b981' : '#94a3b8',
+            stroke: isFocused ? '#10b981' : isDimmedEdge ? dimmedStroke : '#94a3b8',
             strokeWidth: isFocused ? width + 1.5 : width,
+            opacity: isDimmedEdge ? 0.2 : 1,
           },
           labelBgPadding: [6, 3],
           labelBgBorderRadius: 5,
-          labelStyle: { fontSize: 9, fill: isFocused ? '#047857' : '#475569', fontWeight: 700 },
+          labelStyle: {
+            fontSize: 9,
+            fill: isFocused ? '#047857' : '#475569',
+            fontWeight: 700,
+            opacity: isDimmedEdge ? 0.2 : 1
+          },
         }
       })
 
@@ -332,8 +364,9 @@ export default function KGGraph() {
 
     return () => {
       simulation.stop()
+      simulationRef.current = null
     }
-  }, [filteredNodes, filteredEdges, graphFocus, setNodes, setEdges])
+  }, [filteredNodes, filteredEdges, graphFocus, hoveredNodeId, connectedNodeIds, setNodes, setEdges])
 
   useEffect(() => {
     if (!graphFocus || !data) return
@@ -377,6 +410,46 @@ export default function KGGraph() {
     setSelectedTypes(new Set())
   }, [])
 
+  const onNodeMouseEnter = useCallback((_event: React.MouseEvent, node: Node) => {
+    setHoveredNodeId(node.id)
+  }, [])
+
+  const onNodeMouseLeave = useCallback((_event: React.MouseEvent, _node: Node) => {
+    setHoveredNodeId(null)
+  }, [])
+
+  const onNodeDragStart = useCallback((_event: React.MouseEvent, node: Node) => {
+    if (simulationRef.current) {
+      simulationRef.current.alphaTarget(0.3).restart()
+      const simNode = simulationRef.current.nodes().find((n: any) => n.id === node.id)
+      if (simNode) {
+        simNode.fx = node.position.x
+        simNode.fy = node.position.y
+      }
+    }
+  }, [])
+
+  const onNodeDrag = useCallback((_event: React.MouseEvent, node: Node) => {
+    if (simulationRef.current) {
+      const simNode = simulationRef.current.nodes().find((n: any) => n.id === node.id)
+      if (simNode) {
+        simNode.fx = node.position.x
+        simNode.fy = node.position.y
+      }
+    }
+  }, [])
+
+  const onNodeDragStop = useCallback((_event: React.MouseEvent, node: Node) => {
+    if (simulationRef.current) {
+      simulationRef.current.alphaTarget(0)
+      const simNode = simulationRef.current.nodes().find((n: any) => n.id === node.id)
+      if (simNode) {
+        simNode.fx = null
+        simNode.fy = null
+      }
+    }
+  }, [])
+
   if (isLoading) return <KGSkeleton />
   if (isError) return <ErrorState message={error instanceof Error ? error.message : undefined} />
   if (!data?.nodes?.length) return <EmptyState />
@@ -398,6 +471,11 @@ export default function KGGraph() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onSelectionChange={handleSelectionChange}
+        onNodeDragStart={onNodeDragStart}
+        onNodeDrag={onNodeDrag}
+        onNodeDragStop={onNodeDragStop}
+        onNodeMouseEnter={onNodeMouseEnter}
+        onNodeMouseLeave={onNodeMouseLeave}
         fitView
         fitViewOptions={{ padding: 0.22 }}
         minZoom={0.25}
