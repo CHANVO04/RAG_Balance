@@ -20,7 +20,6 @@ NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "rag_password")
 
 KG_LLM_PROVIDER    = os.getenv("KG_LLM_PROVIDER",    "openai")
 KG_LLM_MODEL       = os.getenv("KG_LLM_MODEL",       "gpt-4.1-mini")
-KG_OLLAMA_BASE_URL = os.getenv("KG_OLLAMA_BASE_URL",  "http://localhost:11434")
 KG_MAX_TRIPLETS    = int(os.getenv("KG_MAX_TRIPLETS", "10"))
 KG_ENABLED         = os.getenv("KG_ENABLED", "true").lower() == "true"
 KG_CALL_DELAY_SEC  = float(os.getenv("KG_CALL_DELAY_SEC", "0.1"))

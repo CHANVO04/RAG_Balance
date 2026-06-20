@@ -58,6 +58,3 @@ def get_collection(name: str):
         )
 
 
-# Backward-compat alias used by legacy code referencing get_chroma_client
-def get_chroma_client():
-    return get_qdrant_client()

@@ -29,7 +29,7 @@ CHUNK_TOKENIZER  = "cl100k_base"
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # ── Chunking ──────────────────────────────────────────────────────────────────
-CHROMA_COLLECTION   = "rag_docs"      # kept for backward compat references
+
 CHUNK_MAX_TOKENS    = 512
 CHUNK_OVERLAP_RATIO = 0.15
 MIN_CHUNK_CHARS     = 30

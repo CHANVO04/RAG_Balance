@@ -448,6 +448,3 @@ def delete_workspace_from_qdrant(client: QdrantClient, workspace_id: str) -> Dic
     return removed
 
 
-# ── Backward-compat aliases (used by legacy code paths) ──────────────────────
-def get_chroma_client(*args, **kwargs):
-    return get_qdrant_client()

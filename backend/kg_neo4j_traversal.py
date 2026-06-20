@@ -232,7 +232,7 @@ def lookup_kg_context(
     # ── STEP 1: Extract entities from query ──────────────────────────────────
     seed_ids: List[str] = []
 
-    if use_llm_entity_extract and KG_LLM_PROVIDER in ("openai", "ollama"):
+    if use_llm_entity_extract and KG_LLM_PROVIDER == "openai":
         llm_entities = _extract_query_entities_llm(question)
         if verbose and llm_entities:
             print(f"[KG] LLM extracted entities: {llm_entities}")

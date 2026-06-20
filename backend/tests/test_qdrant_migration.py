@@ -194,12 +194,12 @@ def test_T08_delete_from_qdrant(client):
     assert len(records) == 0, "Điểm vẫn còn trong DB sau delete"
 
 
-# ── T09: query/clients backward compat ───────────────────────────────────────
-def test_T09_clients_backward_compat():
-    from query.clients import get_qdrant_client, get_chroma_client, get_collection
+# ── T09: query/clients connection singleton ──────────────────────────────────
+def test_T09_clients_singleton():
+    from query.clients import get_qdrant_client, get_collection
     c1 = get_qdrant_client()
-    c2 = get_chroma_client()   # alias
-    assert c1 is c2, "get_chroma_client() phải trả về cùng singleton Qdrant client"
+    c2 = get_qdrant_client()   # singleton check
+    assert c1 is c2, "get_qdrant_client() phải trả về cùng singleton Qdrant client"
 
     # get_collection returns (client, name) tuple
     client_obj, col_name = get_collection("rag_docs")

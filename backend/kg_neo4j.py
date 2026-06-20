@@ -21,7 +21,6 @@ from kg_neo4j_config import (
     NEO4J_PASSWORD,
     KG_LLM_PROVIDER,
     KG_LLM_MODEL,
-    KG_OLLAMA_BASE_URL,
     KG_MAX_TRIPLETS,
     KG_ENABLED,
     KG_CALL_DELAY_SEC,
@@ -56,7 +55,7 @@ from kg_neo4j_ops import (
 __all__ = [
     # config
     "NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD",
-    "KG_LLM_PROVIDER", "KG_LLM_MODEL", "KG_OLLAMA_BASE_URL",
+    "KG_LLM_PROVIDER", "KG_LLM_MODEL",
     "KG_MAX_TRIPLETS", "KG_ENABLED", "KG_CALL_DELAY_SEC",
     # manager
     "UsageTracker", "usage_tracker", "KGTriplet", "Neo4jManager", "get_neo4j_manager",

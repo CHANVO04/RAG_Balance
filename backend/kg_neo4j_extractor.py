@@ -14,7 +14,7 @@ from types import SimpleNamespace
 from typing import Any, Dict, List
 
 from kg_neo4j_config import (
-    KG_LLM_PROVIDER, KG_LLM_MODEL, KG_OLLAMA_BASE_URL,
+    KG_LLM_PROVIDER, KG_LLM_MODEL,
     KG_MAX_TRIPLETS, KG_ENABLED, KG_CALL_DELAY_SEC,
 )
 from kg_neo4j_manager import KGTriplet, get_neo4j_manager, usage_tracker
@@ -132,33 +132,9 @@ def _call_openai(prompt: str, model: str, max_tokens: int = 512) -> str:
     except Exception as e:
         raise RuntimeError(f"[KG] OpenAI failed: {e}")
 
-
-def _call_ollama(prompt: str, model: str, max_tokens: int = 512) -> str:
-    try:
-        import requests
-        payload = {
-            "model":  model,
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.05, "num_predict": max_tokens},
-        }
-        resp = requests.post(
-            f"{KG_OLLAMA_BASE_URL}/api/generate",
-            json=payload,
-            timeout=60,
-        )
-        resp.raise_for_status()
-        return resp.json().get("response", "").strip()
-    except Exception as e:
-        print(f"[KG][ERR] Ollama call failed: {e}")
-        return "{}"
-
-
 def _call_llm(prompt: str, max_tokens: int = 512) -> str:
     if KG_LLM_PROVIDER == "openai":
         return _call_openai(prompt, KG_LLM_MODEL, max_tokens)
-    elif KG_LLM_PROVIDER == "ollama":
-        return _call_ollama(prompt, KG_LLM_MODEL, max_tokens)
     else:
         raise ValueError(f"[KG] Unknown provider: '{KG_LLM_PROVIDER}'")
 
