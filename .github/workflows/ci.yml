@@ -43,7 +43,7 @@ jobs:
     - name: Install Frontend Dependencies
       run: |
         cd frontend/react-app
-        npm ci
+        npm install --legacy-peer-deps
 
     - name: Build Frontend React
       run: |
