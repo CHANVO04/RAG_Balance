@@ -64,6 +64,7 @@ logs/
 
 # lib/ (third-party JS, không cần track)
 lib/
+!frontend/react-app/src/lib/
 
 # Temporary
 *.tmp
