@@ -4,9 +4,9 @@ echo  Scientific RAG - Setup (First Time)
 echo ================================================
 echo.
 
-echo [1/3] Installing npm packages for React frontend...
+echo [1/5] Installing npm packages for React frontend...
 cd /d %~dp0frontend\react-app
-call npm install
+call npm install --legacy-peer-deps
 if errorlevel 1 (
     echo ERROR: npm install failed. Make sure Node.js is installed.
     pause
@@ -51,7 +51,7 @@ if not exist .env (
 echo.
 
 echo [5/5] Verifying imports...
-python -c "import fastapi, uvicorn, docling, qdrant_client, neo4j, sentence_transformers, torch; print('[OK] Core packages verified successfully!')"
+python -c "import fastapi, uvicorn, docling, qdrant_client, neo4j, sentence_transformers, torch, umap; print('[OK] Core packages verified successfully!')"
 echo.
 
 echo ================================================
