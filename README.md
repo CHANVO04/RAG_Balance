@@ -14,7 +14,7 @@
 
 ### 🎥 [Xem Video Trực Quan Trên YouTube](https://www.youtube.com/watch?v=AkAaCEXnY_U)
 
-![Giao diện chính của SciHybrid-RAG](docs/assets/ui_demo.png)
+![Giao diện chính của SciHybrid-RAG](docs/assets/image.png)
 
 *Giao diện 3 phân vùng (3-Pane Layout) đồng bộ thời gian thực: Sidebar quản lý tài liệu & Workspace, Màn hình chat trực quan hiển thị trích dẫn công thức LaTeX & ảnh, Trình xem PDF gốc hỗ trợ tự động cuộn đến trang trích dẫn.*
 
