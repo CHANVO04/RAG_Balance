@@ -97,3 +97,14 @@ Vì thư viện PyTorch mặc định tải về bản có hỗ trợ card đồ
    pip install torch --index-url https://download.pytorch.org/whl/cpu
    ```
 4. Sau đó bạn quay lại thư mục gốc và chạy file `.\run_dev.bat` như bình thường. Hệ thống sẽ tự động cài các thư viện còn lại mà không tải lại bản PyTorch nặng nữa.
+
+---
+
+## Các công nghệ khoa học chính được sử dụng
+
+Nếu bạn muốn tìm hiểu sâu hoặc trích dẫn các tài liệu khoa học làm nền tảng cho dự án này, dưới đây là các công nghệ cốt lõi:
+1. **IBM Docling**: Thư viện phân tích cấu trúc tài liệu PDF nâng cao của IBM, giúp phân đoạn văn bản thông minh mà không bị mất cấu trúc chương mục.
+2. **Qdrant**: Cơ sở dữ liệu Vector hiệu năng cao dùng để lưu trữ và tìm kiếm tương đồng cho văn bản và các thành phần trực quan.
+3. **Neo4j**: Cơ sở dữ liệu Đồ thị giúp lưu giữ thực thể khoa học và các liên kết tri thức phục vụ cho việc suy luận ngữ nghĩa (GraphRAG).
+4. **OpenAI text-embedding-3-small & GPT-4.1-mini**: Các mô hình nhúng ngôn ngữ và xử lý đa phương thức (Vision) để nhận diện công thức, bảng biểu và sinh câu trả lời.
+

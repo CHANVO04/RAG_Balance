@@ -148,21 +148,21 @@ Known gaps:
 Start Qdrant:
 
 ```powershell
-cd C:\Users\admin\OneDrive\Desktop\A1_MinhChan\A_KLTN_RAG\ALL_ABOUT_RAG\A_RAG_MAIN\backend\qdrant-server
+cd backend/qdrant-server
 docker compose up -d
 ```
 
 Start Neo4j for Hybrid/Graph work:
 
 ```powershell
-cd C:\Users\admin\OneDrive\Desktop\A1_MinhChan\A_KLTN_RAG\ALL_ABOUT_RAG\A_RAG_MAIN\backend\neo4j-server
+cd backend/neo4j-server
 docker compose up -d
 ```
 
 Start backend:
 
 ```powershell
-cd C:\Users\admin\OneDrive\Desktop\A1_MinhChan\A_KLTN_RAG\ALL_ABOUT_RAG\A_RAG_MAIN\backend
+cd backend
 venv\Scripts\activate
 python main.py
 ```
@@ -170,15 +170,15 @@ python main.py
 Start frontend in PowerShell:
 
 ```powershell
-cd C:\Users\admin\OneDrive\Desktop\A1_MinhChan\A_KLTN_RAG\ALL_ABOUT_RAG\A_RAG_MAIN\frontend\react-app
+cd frontend/react-app
 npm run dev
 ```
 
 Start frontend in CMD:
 
 ```bat
-cd C:\Users\admin\OneDrive\Desktop\A1_MinhChan\A_KLTN_RAG\ALL_ABOUT_RAG\A_RAG_MAIN\frontend\react-app
-"C:\Program Files\nodejs\npm.cmd" run dev
+cd frontend/react-app
+npm run dev
 ```
 
 Local URLs:
