@@ -6,7 +6,7 @@ This file is the quick-start state snapshot for future development sessions. Rea
 
 ## System Summary
 
-RAG Balance is a decoupled Hybrid Graph-Vector RAG system for scientific papers, focused on PB-NOMA research. The development path is FastAPI + React.
+RAG Balance is a decoupled Hybrid Graph-Vector RAG system for scientific papers. The development path is FastAPI + React.
 
 Main capabilities implemented:
 
@@ -233,6 +233,6 @@ Do this before Graph expansion:
 
 1. Stabilize OnlyVector as a clean baseline.
 2. Add `only_vector_fast` for text-only ingest/query ablation.
-3. Create a 20-50 question QA set from PB-NOMA papers.
+3. Create a 20-50 question QA set from scientific papers.
 4. Measure retrieval recall, citation accuracy, latency, and answer groundedness.
 5. Then compare against Hybrid with KG and rerank enabled.
