@@ -1,7 +1,7 @@
 """
 ingest/embedder.py — OpenAIEmbedderWrapper + singleton cache.
 
-Replaces SentenceTransformerWrapper (BAAI/bge-m3) with OpenAI text-embedding-3-large.
+Replaces SentenceTransformerWrapper (BAAI/bge-m3) with OpenAI text-embedding-3-small.
 
 INTERFACE CONTRACT (matches SentenceTransformer.encode() behavior):
   encode(str)        → np.ndarray shape (dim,)      — 1D, used by query/cache + vector_retriever
