@@ -1,0 +1,15 @@
+{
+  "pythonVersion": "3.10",
+  "venvPath": "backend",
+  "venv": "venv",
+  "extraPaths": [
+    "backend"
+  ],
+  "exclude": [
+    "backend/venv",
+    ".venv",
+    "A_Read_Paper"
+  ],
+  "reportMissingImports": "warning",
+  "reportMissingModuleSource": "none"
+}

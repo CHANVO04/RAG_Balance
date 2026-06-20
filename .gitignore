@@ -1,0 +1,106 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+.Python
+.pytest_cache/
+.mypy_cache/
+
+# Virtual Environment
+venv/
+env/
+.venv/
+
+# Environment variables (chứa API keys — TUYỆT ĐỐI không commit)
+.env
+.env.local
+
+# ChromaDB local data
+chroma_db/
+*.sqlite3
+
+# Vector store data (database lớn — không commit)
+vector_store/*.json
+vector_store/*.graphml
+vector_store/snapshots/
+# Nhưng vẫn track cấu trúc
+!vector_store/.gitkeep
+
+# Thesis figures (binary — commit khi hoàn thiện)
+thesis/figures/*.png
+thesis/figures/*.pdf
+!thesis/figures/README.md
+
+# PDF papers (binary lớn — dùng Git LFS hoặc link Drive)
+data/*.pdf
+data/raw_pdfs/*.pdf
+# Nhưng vẫn track ground truth
+!data/ground_truth/
+
+# Model weights
+*.bin
+*.safetensors
+*.pt
+*.pth
+
+# Docling cache
+.docling/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+logs/
+
+# lib/ (third-party JS, không cần track)
+lib/
+
+# Temporary
+*.tmp
+*.bak
+
+# Frontend generated/dependency files
+frontend/react-app/node_modules/
+frontend/react-app/dist/
+frontend/react-app/.vite/
+
+# Backend runtime/generated data
+backend/.env
+backend/venv/
+backend/data/*
+!backend/data/.gitkeep
+backend/db/*
+!backend/db/.gitkeep
+!backend/db/assets/
+backend/db/assets/*
+!backend/db/assets/.gitkeep
+backend/workspaces/*
+!backend/workspaces/.gitkeep
+backend/check_formula_image/*
+!backend/check_formula_image/.gitkeep
+backend/qdrant-server/storage/
+
+# Local runtime/cache folders
+db/
+scratch/
+.agent/
+.superpowers/
+check_formula_image/
+Test_full_table_formula_image.pdf
+
+# Personal/development-only files (không cần cho người clone dự án)
+A_BaoCao/
+.cursorrules
+backend/packages_backup.txt
+docs/superpowers/
+CLAUDE.md

@@ -1,0 +1,14 @@
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+export default defineConfig({
+  plugins: [react()],
+  server: {
+    proxy: {
+      '/api': { target: 'http://localhost:8000', changeOrigin: true },
+      '/data': { target: 'http://localhost:8000', changeOrigin: true },
+      '/workspace-data': { target: 'http://localhost:8000', changeOrigin: true },
+      '/assets': { target: 'http://localhost:8000', changeOrigin: true },
+    },
+  },
+})

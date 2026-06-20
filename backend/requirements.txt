@@ -1,0 +1,33 @@
+# Core RAG
+docling>=2.8.0               # PDF/DOCX/HTML parsing
+docling-core>=1.0.0          # Docling core types
+qdrant-client>=1.8.0         # Vector DB
+neo4j>=5.18.0                # Knowledge Graph DB (Bolt)
+sentence-transformers>=2.6.0 # bge-m3 embeddings
+torch>=2.2.0                 # Backend for transformers
+transformers>=4.38.0         # LLM & Embedding models
+openai>=1.14.0               # GPT-4o-mini & Vision API
+tiktoken>=0.7.0              # OpenAI tokenizer for chunking/embedding guard
+python-dotenv>=1.0.1         # Config management
+
+# Image & Vision
+Pillow>=10.2.0               # Image processing for Vision API
+tenacity>=8.2.0              # Exponential backoff for API retries
+
+# Frontend & Viz
+umap-learn>=0.5.5            # Embedding space visualization
+
+
+# Utilities
+numpy>=1.26.0
+requests>=2.31.0
+pytest>=8.0.0
+rich>=13.7.0
+tqdm>=4.66.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+python-dateutil>=2.9.0
+typing-extensions>=4.10.0
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+python-multipart>=0.0.9

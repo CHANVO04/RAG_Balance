@@ -17,12 +17,12 @@ import {
   SimulationLinkDatum,
 } from 'd3-force'
 import { useQuery } from '@tanstack/react-query'
-import { AlertTriangle, FileText, GitBranch, Hash, Network, Filter } from 'lucide-react'
+import { AlertTriangle, ExternalLink, FileText, Filter, GitBranch, Hash, Network, X } from 'lucide-react'
 import { fetchGraph, GraphEdge, GraphNode } from '../../api/query'
 import { KGSkeleton } from '../ui/Skeleton'
 import { useWorkspaceStore } from '../../store/workspaceStore'
 import { useToastStore } from '../../store/toastStore'
-import { useStore } from '../../store'
+import { SourceInfo, useStore } from '../../store'
 import { cn } from '../../lib/utils'
 import GraphCircleNode from './GraphCircleNode'
 import GraphFilter from './GraphFilter'
@@ -57,6 +57,10 @@ function edgeId(edge: GraphEdge, index: number) {
 function arrayLabel(values: Array<string | number> | undefined, empty = 'None') {
   if (!values?.length) return empty
   return values.join(', ')
+}
+
+function firstValue<T>(values: T[] | undefined, fallback: T) {
+  return values?.[0] ?? fallback
 }
 
 function EmptyState() {
@@ -101,7 +105,21 @@ function DetailRow({ label, value }: { label: string; value: string | number }) 
   )
 }
 
-function DetailPanel({ node, edge }: { node?: GraphNode; edge?: GraphEdge }) {
+function DetailPanel({
+  node,
+  edge,
+  sourceNode,
+  targetNode,
+  onOpenSource,
+  onClose,
+}: {
+  node?: GraphNode
+  edge?: GraphEdge
+  sourceNode?: GraphNode
+  targetNode?: GraphNode
+  onOpenSource: (edge: GraphEdge) => void
+  onClose: () => void
+}) {
   if (!node && !edge) {
     return (
       <aside className="absolute right-3 top-3 z-10 w-[290px] rounded-lg border border-border/70 bg-background/95 p-4 shadow-lg backdrop-blur">
@@ -119,12 +137,22 @@ function DetailPanel({ node, edge }: { node?: GraphNode; edge?: GraphEdge }) {
   if (node) {
     return (
       <aside className="absolute right-3 top-3 z-10 max-h-[calc(100%-24px)] w-[290px] overflow-auto rounded-lg border border-border/70 bg-background/95 p-4 shadow-lg backdrop-blur">
-        <div className="mb-3 flex items-start gap-2">
-          <Hash size={16} className="mt-0.5 shrink-0 text-emerald-600" />
-          <div className="min-w-0">
+        <div className="mb-3 flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-start gap-2">
+            <Hash size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+            <div className="min-w-0">
             <div className="break-words text-sm font-semibold leading-5 text-foreground">{node.label}</div>
             <div className="mt-0.5 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{node.type || 'Concept'}</div>
+            </div>
           </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            aria-label="Close graph detail"
+          >
+            <X size={14} />
+          </button>
         </div>
         <div className="space-y-2.5">
           <DetailRow label="Mentions" value={node.mentions ?? 0} />
@@ -136,26 +164,53 @@ function DetailPanel({ node, edge }: { node?: GraphNode; edge?: GraphEdge }) {
     )
   }
 
+  const sourceLabel = sourceNode?.label || edge?.source || 'Source'
+  const targetLabel = targetNode?.label || edge?.target || 'Target'
+  const fileName = edge?.source_file || firstValue(edge?.source_files, '')
+  const page = edge?.page || firstValue(edge?.pages, 0)
+  const hasSource = Boolean(fileName)
+
   return (
     <aside className="absolute right-3 top-3 z-10 max-h-[calc(100%-24px)] w-[310px] overflow-auto rounded-lg border border-border/70 bg-background/95 p-4 shadow-lg backdrop-blur">
-      <div className="mb-3 flex items-start gap-2">
-        <FileText size={16} className="mt-0.5 shrink-0 text-emerald-600" />
-        <div className="min-w-0">
-          <div className="break-words text-sm font-semibold leading-5 text-foreground">{edge?.relation || 'Relation'}</div>
-          <div className="mt-0.5 break-words text-[11px] text-muted-foreground">{edge?.source} {'->'} {edge?.target}</div>
+      <div className="mb-3 flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-start gap-2">
+          <FileText size={16} className="mt-0.5 shrink-0 text-emerald-600" />
+          <div className="min-w-0">
+            <div className="break-words text-sm font-semibold leading-5 text-foreground">{edge?.relation || 'Relation'}</div>
+            <div className="mt-0.5 break-words text-[11px] text-muted-foreground">{sourceLabel} {'->'} {targetLabel}</div>
+          </div>
         </div>
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+          aria-label="Close graph detail"
+        >
+          <X size={14} />
+        </button>
       </div>
       <div className="space-y-2.5">
         <DetailRow label="Weight" value={edge?.weight ?? 0} />
-        <DetailRow label="File" value={edge?.source_file || 'None'} />
-        <DetailRow label="Page" value={edge?.page || 'None'} />
+        <DetailRow label="Confidence" value={edge?.confidence ? `${Math.round(edge.confidence * 100)}%` : 'None'} />
+        <DetailRow label="File" value={fileName || 'None'} />
+        <DetailRow label="Page" value={page || 'None'} />
         <DetailRow label="Chunks" value={arrayLabel(edge?.chunk_ids)} />
+        <DetailRow label="Visuals" value={arrayLabel(edge?.visual_ids)} />
         <div className="pt-1">
           <div className="mb-1 text-xs text-muted-foreground">Evidence</div>
           <p className="rounded-md border border-border/60 bg-muted/30 p-2 text-xs leading-5 text-foreground">
             {edge?.evidence_preview || 'No evidence preview available.'}
           </p>
         </div>
+        <button
+          type="button"
+          disabled={!edge || !hasSource}
+          onClick={() => edge && onOpenSource(edge)}
+          className="mt-1 flex h-9 w-full items-center justify-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 px-3 text-xs font-bold text-emerald-700 transition-colors hover:bg-emerald-500 hover:text-white disabled:cursor-not-allowed disabled:border-border disabled:bg-muted/30 disabled:text-muted-foreground"
+        >
+          <ExternalLink size={14} />
+          Open evidence source
+        </button>
       </div>
     </aside>
   )
@@ -165,9 +220,11 @@ export default function KGGraph() {
   const activeWorkspaceId = useWorkspaceStore((s) => s.activeWorkspaceId)
   const pushToast = useToastStore((s) => s.pushToast)
   const graphFocus = useStore((s) => s.graphFocus)
+  const activateSource = useStore((s) => s.activateSource)
+  const [showChunks, setShowChunks] = useState(false)
   const { data, isLoading, isError, error } = useQuery({
-    queryKey: ['graph', activeWorkspaceId],
-    queryFn: () => fetchGraph(activeWorkspaceId),
+    queryKey: ['graph', activeWorkspaceId, showChunks],
+    queryFn: () => fetchGraph(activeWorkspaceId, showChunks),
     staleTime: 60_000,
   })
 
@@ -179,6 +236,28 @@ export default function KGGraph() {
 
   const nodeTypes = useMemo(() => ({ circleNode: GraphCircleNode }), [])
 
+  const graphToolbar = (
+    <div className="absolute left-3 top-3 z-10 flex flex-wrap items-center gap-2">
+      <button
+        onClick={() => setIsFilterOpen(true)}
+        className="flex h-9 items-center gap-2 rounded-lg border border-border/80 bg-background/90 px-3 text-xs font-bold text-foreground shadow-lg backdrop-blur transition-all hover:bg-accent active:scale-95"
+      >
+        <Filter size={14} className="text-emerald-600 dark:text-emerald-400" />
+        Bộ lọc thực thể
+      </button>
+
+      <label className="flex h-9 items-center gap-2 rounded-lg border border-border/80 bg-background/90 px-3 text-xs font-semibold text-muted-foreground shadow-lg backdrop-blur transition-colors hover:bg-accent">
+        <input
+          type="checkbox"
+          checked={showChunks}
+          onChange={(event) => setShowChunks(event.target.checked)}
+          className="h-3.5 w-3.5 rounded border-border accent-emerald-600"
+        />
+        Show Document Chunks
+      </label>
+    </div>
+  )
+
   const edgeById = useMemo(() => {
     const pairs = data?.edges?.map((edge, index) => [edgeId(edge, index), edge] as const) ?? []
     return new Map(pairs)
@@ -187,6 +266,8 @@ export default function KGGraph() {
   const nodeById = useMemo(() => new Map((data?.nodes ?? []).map((node) => [node.id, node] as const)), [data?.nodes])
   const selectedNode = selection?.kind === 'node' ? nodeById.get(selection.id) : undefined
   const selectedEdge = selection?.kind === 'edge' ? edgeById.get(selection.id) : undefined
+  const selectedEdgeSourceNode = selectedEdge ? nodeById.get(selectedEdge.source) : undefined
+  const selectedEdgeTargetNode = selectedEdge ? nodeById.get(selectedEdge.target) : undefined
 
   // Track current node positions in ref to avoid re-running force simulation loop
   const nodesRef = useRef<Node[]>([])
@@ -261,6 +342,8 @@ export default function KGGraph() {
     }
 
     const focusNodeIds = new Set(graphFocus?.nodeIds ?? [])
+    const selectedNodeId = selection?.kind === 'node' ? selection.id : null
+    const selectedEdgeId = selection?.kind === 'edge' ? selection.id : null
 
     // Reuse existing node positions for stability
     const existingPositions = new Map<string, { x: number; y: number }>()
@@ -315,6 +398,7 @@ export default function KGGraph() {
           id: n.id,
           type: 'circleNode',
           position: { x: n.x ?? 0, y: n.y ?? 0 },
+          selected: selectedNodeId === n.id || focusNodeIds.has(n.id),
           data: {
             label: n.label,
             type: n.type,
@@ -330,6 +414,7 @@ export default function KGGraph() {
       const updatedFlowEdges: Edge[] = filteredEdges.map((edge, index) => {
         const id = edgeId(edge, index)
         const isFocused = Boolean(graphFocus?.edgeId && id === graphFocus?.edgeId)
+        const isSelected = selectedEdgeId === id
         const isDimmedEdge = hoveredNodeId !== null && edge.source !== hoveredNodeId && edge.target !== hoveredNodeId
         const width = clamp(1 + Math.log2(Math.max(1, edge.weight ?? 1)), 1.4, 5)
 
@@ -341,17 +426,18 @@ export default function KGGraph() {
           source: edge.source,
           target: edge.target,
           label: edge.relation?.slice(0, 28),
-          animated: isFocused,
+          selected: isSelected,
+          animated: isFocused || isSelected,
           style: {
-            stroke: isFocused ? '#10b981' : isDimmedEdge ? dimmedStroke : '#94a3b8',
-            strokeWidth: isFocused ? width + 1.5 : width,
+            stroke: isFocused || isSelected ? '#10b981' : isDimmedEdge ? dimmedStroke : '#94a3b8',
+            strokeWidth: isFocused || isSelected ? width + 1.5 : width,
             opacity: isDimmedEdge ? 0.2 : 1,
           },
           labelBgPadding: [6, 3],
           labelBgBorderRadius: 5,
           labelStyle: {
             fontSize: 9,
-            fill: isFocused ? '#047857' : '#475569',
+            fill: isFocused || isSelected ? '#047857' : '#475569',
             fontWeight: 700,
             opacity: isDimmedEdge ? 0.2 : 1
           },
@@ -366,10 +452,21 @@ export default function KGGraph() {
       simulation.stop()
       simulationRef.current = null
     }
-  }, [filteredNodes, filteredEdges, graphFocus, hoveredNodeId, connectedNodeIds, setNodes, setEdges])
+  }, [filteredNodes, filteredEdges, graphFocus, hoveredNodeId, connectedNodeIds, selection, setNodes, setEdges])
 
   useEffect(() => {
     if (!graphFocus || !data) return
+    const focusedTypes = graphFocus.nodeIds
+      .map((id) => nodeById.get(id)?.type || '')
+      .filter(Boolean)
+    if (focusedTypes.length) {
+      setSelectedTypes((prev) => {
+        const next = new Set(prev)
+        focusedTypes.forEach((type) => next.add(type))
+        return next
+      })
+    }
+
     if (graphFocus.edgeId && edgeById.has(graphFocus.edgeId)) {
       setSelection({ kind: 'edge', id: graphFocus.edgeId })
       return
@@ -379,6 +476,17 @@ export default function KGGraph() {
     setSelection(nodeId ? { kind: 'node', id: nodeId } : null)
   }, [data, edgeById, graphFocus, nodeById])
 
+  useEffect(() => {
+    if (!selection) return
+    if (selection.kind === 'node' && !nodeById.has(selection.id)) {
+      setSelection(null)
+      return
+    }
+    if (selection.kind === 'edge' && !edgeById.has(selection.id)) {
+      setSelection(null)
+    }
+  }, [edgeById, nodeById, selection])
+
   const handleSelectionChange = useCallback((params: OnSelectionChangeParams) => {
     const edge = params.edges[0]
     if (edge) {
@@ -387,8 +495,58 @@ export default function KGGraph() {
     }
 
     const node = params.nodes[0]
-    setSelection(node ? { kind: 'node', id: node.id } : null)
+    if (node) {
+      setSelection({ kind: 'node', id: node.id })
+    }
   }, [])
+
+  const handleNodeClick = useCallback((_event: React.MouseEvent, node: Node) => {
+    setSelection({ kind: 'node', id: node.id })
+  }, [])
+
+  const handleEdgeClick = useCallback((_event: React.MouseEvent, edge: Edge) => {
+    setSelection({ kind: 'edge', id: edge.id })
+  }, [])
+
+  const handlePaneClick = useCallback(() => {
+    setSelection(null)
+  }, [])
+
+  const openEdgeSource = useCallback((edge: GraphEdge) => {
+    const fileName = edge.source_file || firstValue(edge.source_files, '')
+    if (!fileName) {
+      pushToast({
+        type: 'error',
+        title: 'Graph source missing',
+        description: 'Relation này chưa có file nguồn để mở PDF.',
+      })
+      return
+    }
+
+    const page = edge.page || firstValue(edge.pages, 1) || 1
+    const encodedFile = encodeURIComponent(fileName)
+    const pdfUrl = activeWorkspaceId === 'default'
+      ? `/data/${encodedFile}`
+      : `/workspace-data/${encodeURIComponent(activeWorkspaceId)}/data/${encodedFile}`
+    const source: SourceInfo = {
+      id: 0,
+      citation_id: edge.id || 'KG',
+      ref_id: edge.id || 'KG',
+      kind: 'text',
+      content: edge.evidence_preview || '',
+      file_name: fileName,
+      page,
+      score: edge.confidence || edge.weight || 0,
+      section_label: `Graph evidence: ${edge.relation}`,
+      has_table: false,
+      has_formula: false,
+      has_image: false,
+      pdf_url: pdfUrl,
+      display: '',
+    }
+
+    activateSource(source)
+  }, [activeWorkspaceId, activateSource, pushToast])
 
   const handleToggleType = useCallback((type: string) => {
     setSelectedTypes((prev) => {
@@ -452,17 +610,18 @@ export default function KGGraph() {
 
   if (isLoading) return <KGSkeleton />
   if (isError) return <ErrorState message={error instanceof Error ? error.message : undefined} />
-  if (!data?.nodes?.length) return <EmptyState />
+  if (!data?.nodes?.length) {
+    return (
+      <div className="relative h-full min-h-0 bg-background">
+        {graphToolbar}
+        <EmptyState />
+      </div>
+    )
+  }
 
   return (
     <div className="relative h-full min-h-0 bg-background">
-      <button
-        onClick={() => setIsFilterOpen(true)}
-        className="absolute left-3 top-3 z-10 flex items-center gap-2 rounded-xl border border-border/80 bg-background/90 px-3 py-2 text-xs font-bold text-foreground shadow-lg backdrop-blur hover:bg-accent transition-all active:scale-95 cursor-pointer animate-in fade-in duration-300"
-      >
-        <Filter size={14} className="text-emerald-600 dark:text-emerald-400" />
-        Bộ lọc thực thể
-      </button>
+      {graphToolbar}
 
       <ReactFlow
         nodes={nodes}
@@ -471,6 +630,9 @@ export default function KGGraph() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onSelectionChange={handleSelectionChange}
+        onNodeClick={handleNodeClick}
+        onEdgeClick={handleEdgeClick}
+        onPaneClick={handlePaneClick}
         onNodeDragStart={onNodeDragStart}
         onNodeDrag={onNodeDrag}
         onNodeDragStop={onNodeDragStop}
@@ -487,7 +649,14 @@ export default function KGGraph() {
         <Controls />
       </ReactFlow>
 
-      <DetailPanel node={selectedNode} edge={selectedEdge} />
+      <DetailPanel
+        node={selectedNode}
+        edge={selectedEdge}
+        sourceNode={selectedEdgeSourceNode}
+        targetNode={selectedEdgeTargetNode}
+        onOpenSource={openEdgeSource}
+        onClose={() => setSelection(null)}
+      />
 
       {isFilterOpen && (
         <GraphFilter
