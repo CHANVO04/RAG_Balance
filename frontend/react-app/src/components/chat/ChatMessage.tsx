@@ -179,10 +179,10 @@ export default function ChatMessage({ message, isStreaming }: { message: Message
   // Group segments into paragraphs for memoization
   const paragraphs = useMemo(() => {
     const p: Segment[][] = [[]]
-    mergeAdjacentTextSegments(message.segments).forEach(seg => {
+    mergeAdjacentTextSegments(message.segments).forEach((seg: Segment) => {
       if (seg.type === 'text' && seg.content.includes('\n\n')) {
         const parts = seg.content.split('\n\n')
-        parts.forEach((part, i) => {
+        parts.forEach((part: string, i: number) => {
           if (i > 0) p.push([])
           p[p.length - 1].push({ ...seg, content: part })
         })
