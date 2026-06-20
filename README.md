@@ -265,7 +265,7 @@ Nếu bạn muốn thử nghiệm nhanh quá trình trích xuất tài liệu ho
    ```
 3. **Truy vấn qua CLI Debugger:**
    ```bash
-   python -m query.cli --query "PB-NOMA là gì và tại sao cần fuzzy clustering?"
+   python -m query.cli --query "Đặt câu hỏi bất kì liên quan đến tài liệu ingest"
    ```
 
 ---
