@@ -705,7 +705,7 @@ def _run_ingest(
     ingest_mode: str = "hybrid",
     workspace_id: str = "default",
 ) -> None:
-    global _active_task, _umap_cache
+    global _active_task
     started_wall = time.time()
     started_perf = time.perf_counter()
 
