@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Welcome! This is the ultimate developer and AI agent handbook for **RAG Balance**, a decoupled **Hybrid Graph-Vector RAG system** designed for scientific papers (specifically focusing on *PB-NOMA - Partial-Beam Non-Orthogonal Multiple Access* research).
+Welcome! This is the ultimate developer and AI agent handbook for **RAG Balance**, a decoupled **Hybrid Graph-Vector RAG system** designed for scientific papers.
 
 This document serves as the **source of truth** for any AI coder (like Antigravity, Claude Code, or Cursor) to understand system architecture, directory layouts, coding standards, gotchas, and execution rules.
 
@@ -40,7 +40,6 @@ To maintain extreme code quality and system simplicity, you **must** adhere to t
 | Component                   | Technology                            | Detail / Configuration                                                                                                                                                                                                                                |
 | :-------------------------- | :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Frontend UI**       | **React + Vite + TypeScript**   | Port `5173`. Uses Zustand for state, Tailwind + shadcn/ui for UI.                                                                                                                                                                                   |
-| **Legacy UI**         | **Streamlit Fallback**          | `frontend/app.py` for debugging/legacy evaluation visualizers.                                                                                                                                                                                      |
 | **Backend API**       | **FastAPI (Python 3.10+)**      | Port `8000`. Async controllers, SSE for chat, Static file mount for data.                                                                                                                                                                           |
 | **Vector DB**         | **Qdrant (Docker)**             | Current active collections:`rag_docs` for embedded chunks and `rag_visuals` for full table/image/formula payload lookup. Legacy helpers for `rag_tables`, `rag_formulas`, and `rag_images` still exist but are not on the main ingest path. |
 | **Knowledge Graph**   | **Neo4j (Docker)**              | Local Docker on Bolt. Cypher queries for 2-hop entity-relation traversal.                                                                                                                                                                             |
@@ -106,12 +105,9 @@ A_RAG_MAIN/
 │   │   │   └── hooks/         # Custom hooks (StreamBuffer FSM, PDF scrolls)
 │   │   ├── package.json       # React Vite manifest
 │   │   └── vite.config.ts     # Proxy configuration for Port 8000
-│   └── app.py                 # Legacy Streamlit fallback UI
 ├── docs/                      # Technical System Documentation
 │   └── superpowers/specs/     # E2E Test & React-FastAPI migration specs
 ├── AGENTS.md                  # This file (AI Guide)
-├── PRD.md                     # Product Requirements Document
-├── PROGRESS.md                # Progress tracker for modules
 └── scripts/                   # System automation scripts (PowerShell)
 ```
 
@@ -294,17 +290,6 @@ You can run the entire decoupled cluster automatically:
 powershell -File scripts/start-all.ps1
 ```
 
-### 8.4 Legacy Streamlit GUI Fallback
-
-If you need local evaluation utilities or quick legacy UI testing:
-
-```powershell
-cd backend
-.venv\Scripts\activate
-streamlit run ../frontend/app.py
-```
-
 ---
 
-*“Simplicity is the ultimate sophistication. Think deeply, keep your abstractions thin, and double-check validation scripts before deployment.”
-Bạn hãy tìm kiếm các giao diện web đẹp, tinh tế từng nút, chữ, kiểu, màu sắc từ đó dùng mcp stich chụp lại rồi hoàn thiện frontend hiện tại của tôi hơn*
+*“Simplicity is the ultimate sophistication. Think deeply, keep your abstractions thin, and double-check validation scripts before deployment.”*

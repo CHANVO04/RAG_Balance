@@ -6,7 +6,7 @@ This file is the quick-start state snapshot for future development sessions. Rea
 
 ## System Summary
 
-RAG Balance is a decoupled Hybrid Graph-Vector RAG system for scientific papers, focused on PB-NOMA research. The production-facing development path is now FastAPI + React. Streamlit remains as a legacy fallback.
+RAG Balance is a decoupled Hybrid Graph-Vector RAG system for scientific papers, focused on PB-NOMA research. The development path is FastAPI + React.
 
 Main capabilities implemented:
 
@@ -37,7 +37,6 @@ Main capabilities still pending:
 | Embedding | `text-embedding-3-small`, 1536 dimensions by config |
 | Reranker | `cross-encoder/ms-marco-MiniLM-L-6-v2`, Hybrid mode only |
 | Generator | `gpt-4.1-mini` |
-| Legacy UI | `frontend/app.py` Streamlit |
 
 Note: older docs mentioned `rag_tables`, `rag_formulas`, and `rag_images` as active collections. Their helper functions still exist in `backend/ingest/vector_store.py`, but the current main ingest path stores full table/image/formula evidence in `rag_visuals`.
 

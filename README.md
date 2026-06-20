@@ -1,12 +1,12 @@
 # 🔬 SciHybrid-RAG (RAG Balance)
-### Hybrid Graph-Vector RAG System for Scientific Papers (PB-NOMA Research)
+### Hybrid Graph-Vector RAG System for Scientific Papers
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Python: 3.10+](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![React: 18](https://img.shields.io/badge/React-18-blue.svg)](https://react.dev/)
 [![Docker: Required](https://img.shields.io/badge/Docker-Required-blue.svg)](https://www.docker.com/)
 
-**SciHybrid-RAG** (tên gốc: **RAG Balance**) là hệ thống **Retrieval-Augmented Generation lai (Hybrid)** chuyên sâu cho tài liệu khoa học phức tạp, cụ thể được tối ưu hóa cho bài toán nghiên cứu *PB-NOMA (Partial-Beam Non-Orthogonal Multiple Access)*. Hệ thống tích hợp song song cơ chế tìm kiếm ngữ nghĩa nhanh của **Vector Database** và khả năng suy luận mối quan hệ sâu của **Đồ thị tri thức (Knowledge Graph)**.
+**SciHybrid-RAG** (tên gốc: **RAG Balance**) là hệ thống **Retrieval-Augmented Generation lai (Hybrid)** chuyên sâu cho tài liệu khoa học phức tạp. Hệ thống tích hợp song song cơ chế tìm kiếm ngữ nghĩa nhanh của **Vector Database** và khả năng suy luận mối quan hệ sâu của **Đồ thị tri thức (Knowledge Graph)**.
 
 ---
 
@@ -238,15 +238,12 @@ SciHybrid-RAG/
 │   │   │   ├── store/      # Quản lý state bằng Zustand
 │   │   │   └── api/        # SSE connection & API client
 │   │   └── package.json
-│   └── app.py              # Legacy Streamlit fallback UI (để debug)
 ├── .github/                # GitHub Configurations
 │   └── workflows/
 │       └── ci.yml          # GitHub Actions (CI) tự động build & test
 ├── LICENSE                 # MIT License
 ├── README.md               # File này
 ├── AGENTS.md               # Sách hướng dẫn cho AI Agents làm việc với codebase
-├── PRD.md                  # Tài liệu yêu cầu sản phẩm ban đầu
-└── PROGRESS.md             # Tiến độ hoàn thành các module
 ```
 
 ---
