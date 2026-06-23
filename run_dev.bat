@@ -33,6 +33,45 @@ if "%SETUP_REQUIRED%"=="1" (
 )
 
 echo.
+echo Checking Docker status...
+docker info >nul 2>&1
+if errorlevel 1 (
+    echo.
+    echo ========================================================
+    echo  LOI: Docker Desktop chua duoc khoi dong!
+    echo  Vui long bat Docker Desktop len truoc khi chay du an.
+    echo ========================================================
+    echo  ERROR: Docker Desktop is not running.
+    echo  Please start Docker Desktop before running this script.
+    echo ========================================================
+    echo.
+    pause
+    exit /b 1
+)
+
+echo Khoi dong cac database containers (Qdrant ^& Neo4j)...
+pushd "%~dp0backend\qdrant-server"
+call docker compose up -d
+if errorlevel 1 (
+    echo ERROR: Khong the khoi dong Qdrant container.
+    popd
+    pause
+    exit /b 1
+)
+popd
+
+pushd "%~dp0backend\neo4j-server"
+call docker compose up -d
+if errorlevel 1 (
+    echo ERROR: Khong the khoi dong Neo4j container.
+    popd
+    pause
+    exit /b 1
+)
+popd
+echo Database containers da san sang!
+
+echo.
 echo Starting FastAPI backend (port 8000)...
 start "FastAPI Backend" cmd /k "cd /d %~dp0backend && venv\Scripts\activate && uvicorn main:app --reload --port 8000"
 timeout /t 3 /nobreak > nul
