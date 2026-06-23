@@ -179,47 +179,38 @@ graph TD
 ### 2. Luồng hỏi đáp (Query Flow)
 
 ```mermaid
-sequenceDiagram
-    participant U as 🧑 Người dùng
-    participant R as 🎨 Giao diện React
-    participant F as ⚙️ FastAPI Backend
-    participant CA as 🧠 Cache ngữ nghĩa
-    participant VR as 🔍 Vector Retriever (Qdrant)
-    participant KR as 🕸️ KG Retriever (Neo4j)
-    participant LLM as 🤖 OpenAI GPT-4.1-mini
-
-    U->>R: Nhập câu hỏi + Nhấn gửi
-    R->>F: Gửi yêu cầu qua cổng SSE (/api/chat/stream)
+graph TD
+    User([🧑 Người dùng]) -->|1. Nhập câu hỏi| React[🎨 Giao diện React]
+    React -->|2. Gọi POST /api/chat/stream| FastAPI[⚙️ FastAPI Backend]
     
-    F->>CA: 1. Kiểm tra cache câu hỏi tương đồng (ngưỡng 0.87)
+    FastAPI --> Cache{3. Check Cache ngữ nghĩa?}
+    Cache -->|Cache Hit| ReturnCache[Trả về câu trả lời từ Cache]
+    ReturnCache --> SSEHit[SSE: done]
+    SSEHit --> User
     
-    alt Cache Hit (Có sẵn trong cache)
-        CA-->>F: Trả về câu trả lời đã lưu
-        F-->>R: Hiển thị ngay lập tức (Xong)
-    else Cache Miss (Không có trong cache)
-        F-->>R: SSE gửi trạng thái "Đang tìm kiếm..."
-        
-        F->>VR: 2. Tìm các chunk tương đồng trên Qdrant (rag_docs)
-        VR-->>F: Trả về Top-K chunks văn bản
-        
-        F->>KR: 3. Tìm quan hệ thực thể 2-hop Neo4j (dựa trên các chunk vừa tìm được)
-        KR-->>F: Trả về Đồ thị tri thức bổ trợ ngữ cảnh
-        
-        F->>VR: 4. Tìm kiếm ảnh/bảng tương ứng (rag_visuals)
-        VR-->>F: Trả về hình ảnh & bảng biểu minh họa
-        
-        F-->>R: SSE gửi sớm nguồn tài liệu (Page & File) để PDF Viewer hiển thị trước
-        
-        F->>LLM: 5. Gửi prompt đầy đủ ngữ cảnh để OpenAI sinh câu trả lời
-        
-        loop Nhận token từng chữ một
-            LLM-->>F: Token chữ mới
-            F-->>R: SSE stream chữ mới lên màn hình
-        end
-        
-        F->>CA: 6. Lưu câu trả lời mới vào bộ nhớ đệm
-        F-->>R: SSE gửi sự kiện hoàn thành (Done)
-    end
+    Cache -->|Cache Miss| Vector[4. Tìm kiếm Vector Qdrant: rag_docs]
+    Vector --> Chunks[Nhận Top-K chunks tương đồng]
+    
+    Chunks --> GraphQuery{5. Workspace có dùng Đồ thị?}
+    GraphQuery -->|Có: Hybrid Mode| Neo4j[Truy vấn 2-hop trên Neo4j theo chunk điểm neo]
+    GraphQuery -->|Không: Only Vector| SkipGraph[Bỏ qua truy vấn Đồ thị]
+    
+    Neo4j --> VisualQuery{6. Câu hỏi hỏi về hình/bảng/công thức?}
+    SkipGraph --> VisualQuery
+    
+    VisualQuery -->|Có| QdrantVisuals[Tìm ảnh/bảng tương ứng từ rag_visuals]
+    VisualQuery -->|Không| SkipVisuals[Bỏ qua truy cập ảnh/bảng]
+    
+    QdrantVisuals --> Citations[7. Gắn mã trích dẫn & Gửi sớm early_sources]
+    SkipVisuals --> Citations
+    
+    Citations --> Prompt[8. Tổng hợp và xây dựng Prompt]
+    Prompt --> OpenAI[9. Gọi OpenAI Streaming gpt-4.1-mini]
+    
+    OpenAI --> StreamSSE[SSE: stream token chữ lên giao diện]
+    StreamSSE --> SaveCache[10. Lưu câu trả lời mới vào Cache]
+    SaveCache --> SSEMissDone[SSE: done]
+    SSEMissDone --> User
 ```
 
 ---
