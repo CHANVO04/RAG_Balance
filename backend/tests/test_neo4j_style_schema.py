@@ -46,6 +46,17 @@ def test_chunk_debug_graph_applies_source_filter_to_all_node_types():
 
     assert "WHERE (n:Document OR n:Chunk OR n:Entity)" in query
     assert "WHERE n:Document OR n:Chunk OR n:Entity\n  AND" not in query
+    assert "n.workspace_id = $workspace_id" in query
+    assert "r.workspace_id = $workspace_id" in query
+    assert "m.workspace_id = $workspace_id" in query
+
+
+def test_bfs_context_query_filters_by_workspace_id():
+    query = config.BFS_CONTEXT_CYPHER
+    assert "seed.workspace_id = $workspace_id" in query
+    assert "nb.workspace_id = $workspace_id" in query
+    assert "all(rel IN relationships(path) WHERE rel.workspace_id = $workspace_id)" in query
+    assert "r.workspace_id = $workspace_id" in query
 
 
 def test_delete_document_cypher_removes_chunks_and_prunes_orphan_entities():

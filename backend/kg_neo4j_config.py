@@ -79,8 +79,10 @@ SET r.weight = CASE WHEN is_replay THEN coalesce(r.weight, 0) ELSE coalesce(r.we
 BFS_CONTEXT_CYPHER = """
 MATCH (seed:Entity)
 WHERE seed.id IN $seed_ids AND seed.workspace_id = $workspace_id
-OPTIONAL MATCH (seed)-[:RELATES_TO*1..2]-(nb:Entity)
+OPTIONAL MATCH path = (seed)-[:RELATES_TO*1..2]-(nb:Entity)
 WHERE nb.workspace_id = $workspace_id
+  AND all(rel IN relationships(path) WHERE rel.workspace_id = $workspace_id)
+WITH seed, nb
 WITH collect(DISTINCT seed.id) + collect(DISTINCT nb.id) AS hood
 MATCH (a:Entity)-[r:RELATES_TO]->(b:Entity)
 WHERE a.id IN hood AND b.id IN hood
@@ -220,8 +222,12 @@ LIMIT $limit
 """
 
 GET_GRAPH_WITH_CHUNKS_VIZ_CYPHER = """
-MATCH (n {workspace_id: $workspace_id})-[r {workspace_id: $workspace_id}]-(m {workspace_id: $workspace_id})
+MATCH (n)-[r]-(m)
 WHERE (n:Document OR n:Chunk OR n:Entity)
+  AND (m:Document OR m:Chunk OR m:Entity)
+  AND n.workspace_id = $workspace_id
+  AND r.workspace_id = $workspace_id
+  AND m.workspace_id = $workspace_id
   AND (
     $source_files IS NULL
     OR coalesce(r.file_name, '') IN $source_files
