@@ -32,6 +32,13 @@ python -m pip install --upgrade pip
 echo.
 
 echo [3/5] Installing Python packages from requirements.txt...
+nvidia-smi >nul 2>&1
+if errorlevel 1 (
+    echo [INFO] Khong phat hien card do hoa NVIDIA. Dang cai dat PyTorch phien ban CPU-only (Sieu nhe ~150MB)...
+    call pip install torch --index-url https://download.pytorch.org/whl/cpu
+) else (
+    echo [INFO] Phat hien card do hoa NVIDIA. Dang cai dat PyTorch phien ban mac dinh (CUDA support)...
+)
 call pip install -r requirements.txt
 if errorlevel 1 (
     echo ERROR: Failed to install Python dependencies.
