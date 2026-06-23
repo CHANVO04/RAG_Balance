@@ -35,7 +35,14 @@ README.md sẽ được tổ chức lại chi tiết như sau:
 | **Trích dẫn nguồn** | Không có hoặc chỉ hiển thị tên file chung chung | Gắn mã trích dẫn ngẫu nhiên 4 ký tự $\rightarrow$ click tự động nhảy tới trang PDF |
 | **Không gian làm việc** | Dùng chung toàn bộ cơ sở dữ liệu | **Workspace Isolation**: Tách biệt thư mục và phân vùng DB cho từng dự án |
 
-### 1.4. Các Tính Năng Chi Tiết (Features)
+### 1.4. Yêu cầu hệ thống (System Requirements)
+- **Hệ điều hành**: Windows 10/11 (khuyên dùng vì có các script `.bat` chạy tự động).
+- **RAM**: Tối thiểu 8GB (Khuyên dùng 16GB để chạy Docker Desktop + server backend/frontend mượt mà).
+- **CPU**: 4-8 nhân vật lý (Do thư viện Docling cần chạy nhiều luồng song song để xử lý file nặng).
+- **GPU (Card đồ họa)**: Không bắt buộc. Dự án mặc định chạy CPU, nhưng nếu có card NVIDIA hỗ trợ CUDA thì PyTorch sẽ chạy nhanh hơn.
+- **Ổ cứng**: Còn trống tối thiểu 10GB (để chứa các ảnh Docker cho Qdrant/Neo4j và các gói thư viện Python PyTorch nặng khoảng 2GB).
+
+### 1.5. Các Tính Năng Chi Tiết (Features)
 Sử dụng thẻ `<details>` để người dùng click mở rộng/thu gọn giống NexusRAG. Các tính năng được trích xuất chính xác 100% từ codebase:
 
 1. `<details><summary><b>1. Trích xuất tài liệu thông minh (IBM Docling)</b></summary>`
@@ -85,30 +92,72 @@ Sử dụng thẻ `<details>` để người dùng click mở rộng/thu gọn g
     - Hiển thị hộp thoại "Luồng suy nghĩ" (Thought) để lập trình viên quan sát được các thông số tìm kiếm, cấu hình LLM trực tiếp.
     - Bộ đếm và cắt gọn token tự động (`_enforce_input_token_budget`) giúp đảm bảo không bao giờ gửi quá giới hạn cửa sổ ngữ cảnh đầu vào của mô hình OpenAI, tránh lỗi hệ thống và tiết kiệm chi phí gọi API.
 
-### 1.5. Hướng dẫn chạy nhanh (Quick Start)
-- Giữ nguyên các phần tiếng Việt cũ:
-  - Những thứ cần chuẩn bị sẵn trên máy tính (Docker, Node.js, Python, OpenAI API Key).
-  - Các bước cài đặt và khởi chạy dự án (clone, điền `.env`, bật Docker compose cho Qdrant/Neo4j, chạy `.\run_dev.bat` để tự động hóa setup và khởi chạy).
-  - Cách truy cập vào ứng dụng (cổng 5173, 8000/docs, 6333/dashboard, 7474).
-  - Cấu trúc thư mục của dự án (mô tả rõ backend, frontend, setup.bat, run_dev.bat).
-  - Mẹo cài đặt nhanh nếu máy mạng yếu hoặc không có card đồ họa GPU (sử dụng pip install torch CPU-only).
+11. `<details><summary><b>11. Thiết kế Giao diện người dùng trực quan (UI / UX Features)</b></summary>`
+    - Giao diện 3 phân vùng hoạt động mượt mà không giật lag, chia tỉ lệ cột tự động co giãn.
+    - Các khung xem tài liệu PDF hỗ trợ phóng to, thu nhỏ và đồng bộ cuộn trang chính xác.
+    - Sơ đồ đồ thị tương tác có màu sắc phân loại thực thể rõ ràng, tự động highlight các liên kết liên quan khi di chuột qua.
+    - Hộp chat hỗ trợ định dạng Markdown đầy đủ, hiển thị các công thức toán học LaTeX trực quan và các thẻ trích dẫn đa phương tiện.
 
-### 1.6. Danh sách công nghệ (Tech Stack)
-Trình bày dưới dạng bảng rõ ràng bao gồm:
-- **Frontend UI**: React 19, Vite, TypeScript, Zustand, D3.js (Force graph), Tailwind CSS.
-- **Backend API**: FastAPI, Python 3.10+, Uvicorn, SSE.
-- **Vector DB**: Qdrant (Docker).
-- **Graph DB**: Neo4j (Docker, Cypher queries).
-- **AI/ML Engine**: IBM Docling, text-embedding-3-small, ms-marco Reranker, GPT-4.1-mini.
+### 1.6. Luồng hoạt động RAG (RAG Pipeline Flow)
+Mô tả rõ ràng 2 luồng hoạt động chính:
+- **Luồng nạp dữ liệu (Ingestion Pipeline)**: Đọc file PDF $\rightarrow$ IBM Docling phân tách cấu trúc $\rightarrow$ Crop công thức/hình vẽ $\rightarrow$ Gọi Vision LLM dịch công thức sang LaTeX & mô tả ảnh $\rightarrow$ Cắt nhỏ (Chunk) $\rightarrow$ Nhúng vector (Embed) $\rightarrow$ Đẩy vào Qdrant (Text & Visuals) & trích xuất quan hệ lưu vào Neo4j.
+- **Luồng hỏi đáp (Retrieval & Generation Pipeline)**: Nhận câu hỏi $\rightarrow$ Quét cache ngữ nghĩa $\rightarrow$ Tìm kiếm vector trên Qdrant $\rightarrow$ Truy vấn 2-hop trên Neo4j theo các chunk vừa tìm được $\rightarrow$ Trích xuất ảnh/bảng tương ứng $\rightarrow$ Reranker sắp xếp điểm $\rightarrow$ Gắn mã trích dẫn $\rightarrow$ Gom ngữ cảnh và sinh câu trả lời qua GPT-4.1-mini.
 
-### 1.7. Các câu hỏi thường gặp (FAQ) & Kế hoạch (Roadmap)
+### 1.7. Các cổng API chính (API Endpoints)
+Liệt kê các API REST chính:
+- `POST /api/chat/stream`: Stream câu trả lời theo thời gian thực qua SSE.
+- `POST /api/ingest`: Tải lên và nạp tài liệu vào workspace.
+- `GET /api/documents`: Danh sách tài liệu kèm thông số chunk, trang, hình ảnh, bảng biểu đã phân tích.
+- `DELETE /api/documents/{file_name}`: Xóa tài liệu khỏi hệ thống.
+- `GET /api/graph`: Lấy dữ liệu đồ thị tri thức (nodes/edges) của workspace.
+- `GET /api/umap`: Lấy tọa độ 2D UMAP phục vụ trực quan hóa.
+- `GET /api/workspaces`: Quản lý các workspace của người dùng.
+
+### 1.8. Hướng dẫn chạy nhanh (Quick Start)
+- Những thứ cần chuẩn bị sẵn trên máy tính
+- Các bước cài đặt và khởi chạy dự án
+- Cách truy cập vào ứng dụng
+- Cấu trúc thư mục của dự án
+- Mẹo cài đặt nhanh nếu máy mạng yếu hoặc không có card đồ họa GPU
+
+### 1.9. Chi tiết Công nghệ (Tech Stack)
+Trình bày dạng bảng chi tiết (Thành phần \| Công nghệ \| Mục đích sử dụng) chia làm 3 nhóm:
+
+#### **Backend (Phần phụ trợ)**
+| Thành phần | Công nghệ | Mục đích sử dụng |
+| :--- | :--- | :--- |
+| API Server | FastAPI | Xây dựng máy chủ bất đồng bộ hiệu năng cao |
+| Server Runner | Uvicorn | Chạy server FastAPI ở cổng local 8000 |
+| Trích xuất PDF | IBM Docling | Đọc, phân đoạn cấu trúc tài liệu PDF/Word |
+| Dịch công thức & Vision | OpenAI GPT-4.1-mini (Vision API) | Dịch ảnh công thức toán sang LaTeX và caption ảnh/bảng |
+| Tokenizer | cl100k_base (tiktoken) | Đếm token để phân chia chunk chính xác với OpenAI |
+| Xử lý ảnh | Pillow (PIL) | Cắt, xử lý định dạng ảnh trước khi gửi Vision API |
+| Giảm chiều 2D | umap-learn | Tính toán tọa độ phân cụm cho biểu đồ UMAP |
+
+#### **Frontend (Phần giao diện)**
+| Thành phần | Công nghệ | Mục đích sử dụng |
+| :--- | :--- | :--- |
+| UI Framework | React 19 + Vite | Xây dựng giao diện web phản hồi nhanh |
+| Ngôn ngữ | TypeScript | Đảm bảo tính chặt chẽ về mặt kiểu dữ liệu |
+| Quản lý State | Zustand | Quản lý trạng thái workspace và chat |
+| Vẽ Đồ Thị | React Flow / D3.js | Vẽ sơ đồ đồ thị mạng lưới thực thể tương tác |
+| Định dạng CSS | Tailwind CSS | Thiết kế giao diện hiện đại và co giãn tốt |
+
+#### **Infrastructure (Cơ sở hạ tầng)**
+| Thành phần | Công nghệ | Mục đích sử dụng |
+| :--- | :--- | :--- |
+| Cơ sở dữ liệu Vector | Qdrant (Docker) | Lưu và tìm kiếm vector tương đồng (dimensions=1536) |
+| Đồ thị tri thức | Neo4j (Docker) | Lưu trữ thực thể và quan hệ, thực hiện truy vấn Cypher |
+| Môi trường chạy | Docker Desktop | Chạy cô lập cơ sở dữ liệu cục bộ |
+
+### 1.10. Các câu hỏi thường gặp (FAQ) & Kế hoạch (Roadmap)
 - Giữ các lỗi trùng cổng, lỗi Docker, lỗi API Key từ README gốc.
 - Roadmap: Hỗ trợ Ollama cục bộ (gemma4, qwen3.5), hoàn thiện tính năng cô lập đồ thị Neo4j chi tiết cho từng người dùng, tích hợp RAGAS đánh giá offline.
 
 ---
 
 ## 2. Sơ đồ kiến trúc Mermaid (Architecture Flow)
-Chúng ta sẽ nhúng trực tiếp sơ đồ Mermaid của luồng nạp (Ingest Flow) và luồng truy vấn (Query Flow) vào README.md để làm tài liệu khoa học trực quan.
+Chúng ta sẽ nhúng trực tiếp sơ đồ Mermaid của luồng nạp (Ingest Flow) và luồng hỏi đáp (Query Flow) vào README.md để làm tài liệu khoa học trực quan.
 
 ---
 
