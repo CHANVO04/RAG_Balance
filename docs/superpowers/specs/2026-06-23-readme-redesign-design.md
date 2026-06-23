@@ -30,7 +30,7 @@ README.md sẽ được tổ chức lại chi tiết như sau:
 | **Công thức Toán** | Bỏ qua hoặc trích xuất lỗi | Cắt ảnh công thức $\rightarrow$ dùng **GPT-Vision** dịch sang LaTeX |
 | **Ảnh & Bảng biểu** | Bỏ qua hoàn toàn | Crop ảnh $\rightarrow$ sinh caption $\rightarrow$ nhúng dạng vector vào `rag_visuals` |
 | **Bộ Chunker** | Cắt theo kích thước cố định (breaks mid-sentence) | **Hybrid Chunker** thông minh: Gom cụm theo ngữ nghĩa + cấu trúc bài viết |
-| **Phương thức Tìm kiếm** | Chỉ tìm kiếm Vector gần đúng (Vector Search) | **Lai 3 đường (Parallel)**: Vector (Qdrant) + Đồ thị 2-hop (Neo4j) + Reranker |
+| **Phương thức Tìm kiếm** | Chỉ tìm kiếm Vector gần đúng (Vector Search) | **Lai kết hợp (Hybrid)**: Vector (Qdrant) + Đồ thị 2-hop (Neo4j) dựa trên các chunk điểm neo |
 | **Đồ thị tri thức** | Không hỗ trợ | Trích xuất quan hệ thực thể $\rightarrow$ lưu Neo4j $\rightarrow$ truy vấn dạng 2-hop |
 | **Trích dẫn nguồn** | Không có hoặc chỉ hiển thị tên file chung chung | Gắn mã trích dẫn ngẫu nhiên 4 ký tự $\rightarrow$ click tự động nhảy tới trang PDF |
 | **Không gian làm việc** | Dùng chung toàn bộ cơ sở dữ liệu | **Workspace Isolation**: Tách biệt thư mục và phân vùng DB cho từng dự án |
@@ -63,7 +63,7 @@ Sử dụng thẻ `<details>` để người dùng click mở rộng/thu gọn g
 4. `<details><summary><b>4. Tìm kiếm lai kết hợp Đồ thị (Hybrid retrieval: Qdrant + Neo4j)</b></summary>`
    - Nhúng văn bản thành vector 1536 chiều bằng mô hình `text-embedding-3-small` rồi lưu vào Qdrant (phân vùng `rag_docs` cho chữ và `rag_visuals` cho ảnh/bảng).
    - Đồ thị tri thức (Neo4j): Không tìm kiếm mù quáng, hệ thống sẽ lấy các chunk vector tìm thấy làm điểm neo (anchors), từ đó quét đồ thị xung quanh trong phạm vi 2-hop (Cypher query) để tìm các mối quan hệ thực thể liên quan trực tiếp.
-   - Tích hợp bộ chấm điểm lại Cross-Encoder (`ms-marco-MiniLM-L-6-v2`) để sắp xếp lại độ ưu tiên ngữ cảnh trước khi gửi tới LLM.
+   - Reranker Cross-Encoder `ms-marco-MiniLM-L-6-v2` được tích hợp sẵn trong codebase phục vụ việc đánh giá và thử nghiệm offline (ở luồng online hỏi đáp, rerank tạm thời được bỏ qua để tối đa hóa tốc độ phản hồi streaming qua SSE).
 
 5. `<details><summary><b>5. Bộ nhớ đệm câu trả lời ngữ nghĩa (Semantic Cache)</b></summary>`
    - Lưu trữ các câu hỏi và câu trả lời cũ vào một cơ sở dữ liệu đệm.
